@@ -1,7 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+@import "tailwindcss";
 
 @theme {
   /* --- PALET WARNA ARCHSMART (Dark Theme) --- */
@@ -80,4 +77,4 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #555; 
-} 
+}
