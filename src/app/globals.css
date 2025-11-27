@@ -2,22 +2,12 @@
 
 @theme {
   /* --- PALET WARNA ARCHSMART (Dark Theme) --- */
-  
-  /* Background Utama (Hitam Pekat) */
   --color-background: #0f0f0f;
-  
-  /* Teks Utama (Putih) */
   --color-foreground: #ffffff;
-
-  /* Warna Aksen (Oranye - dari tombol di desain) */
   --color-primary: #ff8c42;
   --color-primary-hover: #ff7b1a;
-  
-  /* Warna Kartu / Surface */
   --color-card: #1a1a1a;
   --color-card-border: rgba(255, 255, 255, 0.1);
-
-  /* Font (Sesuai Layout) */
   --font-sans: 'Poppins', sans-serif;
 }
 
@@ -33,16 +23,16 @@ body {
 /* --- UTILITIES CUSTOM --- */
 @layer utilities {
   
-  /* Efek Kaca (Glassmorphism) untuk Kartu */
+  /* Efek Kaca (Glassmorphism) */
   .glass-card {
-    background: rgba(255, 255, 255, 0.03); /* Transparan dikit */
-    backdrop-filter: blur(16px);           /* Blur belakangnya */
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--color-card-border);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
 
-  /* Efek Kaca untuk Header (Lebih gelap agar teks terbaca) */
+  /* Header Glass */
   .glass-header {
     background: rgba(15, 15, 15, 0.8);
     backdrop-filter: blur(12px);
@@ -50,12 +40,10 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  /* Padding aman untuk iPhone berponi/notch */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
   
-  /* Utilitas Teks Gradient (Opsional untuk judul) */
   .text-gradient {
     background-clip: text;
     -webkit-background-clip: text;
@@ -64,7 +52,7 @@ body {
   }
 }
 
-/* Scrollbar Custom (Agar menyatu dengan tema gelap) */
+/* Scrollbar Custom */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -77,4 +65,33 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #555; 
+}
+
+/* --- ANIMASI PREMIUM (Soft Rise) --- */
+/* Ganti nama keyframes biar fresh */
+@keyframes premiumSlideUp {
+  from { 
+    opacity: 0; 
+    /* Jarak naik hanya 15px (tidak terlalu jauh) agar mata fokus */
+    transform: translateY(15px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.page-transition {
+  /* Durasi: 0.8s (Pas, tidak terlalu lambat sampai bikin ngantuk, tidak terlalu cepat)
+     Easing: cubic-bezier(0.2, 0.8, 0.2, 1) -> "Soft Landing" yang sangat halus 
+  */
+  animation: premiumSlideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  
+  /* Hapus filter blur/scale agar render lebih tajam & ringan */
+  will-change: transform, opacity;
+}
+
+/* Optimasi Scroll */
+html {
+  scroll-behavior: smooth;
 }

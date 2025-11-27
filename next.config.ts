@@ -2,19 +2,25 @@ import type { NextConfig } from "next";
 
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
-  register: true,
-  skipWaiting: true,
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  swcMinify: false, // <--- UBAH KE FALSE (Solusi Error)
   disable: process.env.NODE_ENV === "development",
+  workboxOptions: {
+    disableDevLogs: true,
+  },
 });
 
 const nextConfig: NextConfig = {
-  output: "export", // Opsional, sesuaikan kebutuhan deploy
+  output: "export", 
   trailingSlash: true,
   images: {
     unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "placehold.co" },
-      // Tambahkan hostname supabase anda disini jika ada
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "i.pravatar.cc" },
     ],
   },
 };

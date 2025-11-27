@@ -93,6 +93,7 @@ export default function HomePage() {
               src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1000&auto=format&fit=crop"
               alt="Course Preview"
               fill
+              priority={true}
               className="object-cover group-hover:scale-110 transition duration-700"
             />
             {/* Harga Badge */}

@@ -1,89 +1,48 @@
 "use client";
 
-import { useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
 import CourseCard from "@/components/CourseCard";
+import { ALL_COURSES } from "@/data/courses"; 
 
-// Dummy Data
-const ALL_COURSES = [
-  {
-    id: "1",
-    title: "Modern Apartment Design",
-    category: "Interior",
-    image:
-      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
-    price: "$24.00",
-    duration: "6 Jam",
-    modules: 12,
-    rating: 4.8,
-  },
-  {
-    id: "2",
-    title: "Eco-Friendly Green House",
-    category: "Sustainable",
-    image:
-      "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800&q=80",
-    price: "Free",
-    duration: "4 Jam",
-    modules: 8,
-    rating: 4.5,
-  },
-  {
-    id: "3",
-    title: "Urban Sketching Masterclass",
-    category: "Skill",
-    image:
-      "https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&w=800&q=80",
-    price: "$15.00",
-    duration: "3 Jam",
-    modules: 5,
-    rating: 4.9,
-  },
-  {
-    id: "4",
-    title: "High-Rise Building Structure",
-    category: "Structure",
-    image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
-    price: "$35.00",
-    duration: "10 Jam",
-    modules: 15,
-    rating: 4.7,
-  },
-  {
-    id: "5",
-    title: "Minimalist Landscape",
-    category: "Landscape",
-    image:
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
-    price: "$18.00",
-    duration: "5 Jam",
-    modules: 9,
-    rating: 4.6,
-  },
-  {
-    id: "6",
-    title: "3D Rendering with Blender",
-    category: "Software",
-    image:
-      "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=800&q=80",
-    price: "$20.00",
-    duration: "8 Jam",
-    modules: 14,
-    rating: 4.8,
-  },
-];
+const ITEMS_PER_PAGE = 6; // Batas item per halaman agar ringan
 
 export default function CoursesPage() {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Filter sederhana berdasarkan judul
-  const filteredCourses = ALL_COURSES.filter((course) =>
-    course.title.toLowerCase().includes(search.toLowerCase())
-  );
+  // 1. Filter Data (Gunakan useMemo agar tidak berat menghitung ulang)
+  const filteredCourses = useMemo(() => {
+    return ALL_COURSES.filter((course) =>
+      course.title.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search]);
+
+  // 2. Reset ke halaman 1 jika user mengetik di search bar
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
+  // 3. Teknik Slicing: Hanya ambil data sesuai halaman yang aktif
+  const visibleCourses = filteredCourses.slice(0, page * ITEMS_PER_PAGE);
+  
+  // 4. Cek apakah masih ada sisa data untuk dimuat
+  const hasMore = visibleCourses.length < filteredCourses.length;
+
+  // Fungsi untuk memuat data berikutnya
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    // Simulasi delay kecil (0.5s) agar interaksi terasa lebih natural (UX)
+    setTimeout(() => {
+      setPage((prev) => prev + 1);
+      setIsLoadingMore(false);
+    }, 500);
+  };
 
   return (
-    <div className="space-y-10 min-h-[80vh] animate-in fade-in duration-700">
+    <div className="space-y-10 min-h-[80vh]">
+      
       {/* Header & Search Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
@@ -91,8 +50,7 @@ export default function CoursesPage() {
             Explore <span className="text-[#ff8c42]">Courses</span>
           </h1>
           <p className="text-gray-400 max-w-md text-sm md:text-base">
-            Temukan materi terbaik untuk meningkatkan skill arsitekturmu hari
-            ini.
+            Temukan materi terbaik untuk meningkatkan skill arsitekturmu hari ini.
           </p>
         </div>
 
@@ -114,7 +72,7 @@ export default function CoursesPage() {
             />
           </div>
 
-          {/* Tombol Filter (Hiasan) */}
+          {/* Tombol Filter */}
           <button className="p-3.5 bg-[#1a1a1a] border border-white/10 rounded-2xl text-gray-400 hover:text-white hover:border-white/30 transition flex-shrink-0">
             <SlidersHorizontal size={20} />
           </button>
@@ -122,11 +80,41 @@ export default function CoursesPage() {
       </div>
 
       {/* Grid Courses */}
-      {filteredCourses.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pb-10">
-          {filteredCourses.map((course) => (
-            <CourseCard key={course.id} {...course} />
-          ))}
+      {visibleCourses.length > 0 ? (
+        <div className="space-y-12 pb-10">
+            {/* Grid Item */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {visibleCourses.map((course) => (
+                    <CourseCard 
+                        key={course.id} 
+                        {...course} 
+                        modules={course.modules_count || 0} 
+                    />
+                ))}
+            </div>
+
+            {/* Tombol Load More (Hanya muncul jika ada sisa data) */}
+            {hasMore && (
+                <div className="flex justify-center">
+                    <button 
+                        onClick={handleLoadMore}
+                        disabled={isLoadingMore}
+                        className="group relative px-8 py-3 rounded-full bg-[#1a1a1a] border border-white/10 text-white font-medium hover:border-[#ff8c42]/50 hover:text-[#ff8c42] transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-lg"
+                    >
+                        <span className="relative z-10 flex items-center gap-2">
+                            {isLoadingMore ? (
+                                <>
+                                    <Loader2 className="animate-spin" size={18}/> Memuat...
+                                </>
+                            ) : (
+                                "Muat Lebih Banyak"
+                            )}
+                        </span>
+                        {/* Efek Hover Background */}
+                        <div className="absolute inset-0 bg-[#ff8c42]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                    </button>
+                </div>
+            )}
         </div>
       ) : (
         /* Empty State */
