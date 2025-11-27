@@ -4,20 +4,41 @@ import { Bookmark } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation"; // <--- Import Router
+import { useRouter } from "next/navigation";
 
 export default function BookmarkButton({ courseId }: { courseId: string }) {
   const { user } = useAuth();
-  const router = useRouter(); // <--- Init Router
+  const router = useRouter();
   const [isSaved, setIsSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // ... (bagian useEffect tetap sama) ...
+  useEffect(() => {
+    // Pindahkan logika pengecekan user ke dalam fungsi async
+    const checkBookmark = async () => {
+      // Jika user belum login, matikan loading dan berhenti
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("bookmarks")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("course_id", courseId)
+        .maybeSingle();
+      
+      if (data) setIsSaved(true);
+      setLoading(false);
+    };
+
+    checkBookmark();
+  }, [user, courseId]);
 
   const toggleBookmark = async () => {
     if (!user) {
       toast.error("Silakan login dahulu");
-      router.push("/login"); // Redirect ke login jika user null
+      router.push("/login");
       return;
     }
 
@@ -25,34 +46,30 @@ export default function BookmarkButton({ courseId }: { courseId: string }) {
     setIsSaved(!isSaved);
 
     if (!previousState) {
-      // LOGIKA SIMPAN
       const { error } = await supabase
         .from("bookmarks")
         .insert({ user_id: user.id, course_id: courseId })
         .select();
 
       if (error) {
-        // Abaikan error duplicate
         if (error.code === '23505') { 
            setIsSaved(true);
            toast.success("Materi berhasil disimpan");
         } 
-        // HANDLER KHUSUS JWT EXPIRED
         else if (error.message.includes("JWT expired")) {
            toast.error("Sesi habis, silakan login ulang");
-           await supabase.auth.signOut(); // Logout paksa
-           router.push("/login"); // Lempar ke halaman login
+           await supabase.auth.signOut();
+           router.push("/login");
         }
         else {
            console.error("Error saving:", error);
            setIsSaved(previousState);
-           toast.error("Gagal menyimpan: " + error.message);
+           toast.error("Gagal menyimpan");
         }
       } else {
         toast.success("Materi disimpan!");
       }
     } else {
-      // ... (Bagian delete tetap sama, boleh tambahkan logika JWT expired juga disini) ...
       const { error } = await supabase
         .from("bookmarks")
         .delete()
@@ -76,10 +93,9 @@ export default function BookmarkButton({ courseId }: { courseId: string }) {
   };
 
   return (
-    // ... (Render button tetap sama) ...
     <button 
       onClick={toggleBookmark}
-      disabled={loading} // Hapus '&& !!user' agar tombol tetap bisa diklik untuk memicu redirect login
+      disabled={loading}
       className={`p-3 rounded-full transition ${
         isSaved 
           ? "bg-[#ff8c42] text-black hover:bg-[#ff8c42]/80" 

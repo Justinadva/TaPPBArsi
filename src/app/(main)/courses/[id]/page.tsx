@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, PlayCircle, Star, Share2, BookOpen } from "lucide-react";
+import { ArrowLeft,  Share2,  } from "lucide-react";
 import { notFound } from "next/navigation";
 import { ALL_COURSES } from "@/data/courses"; // Import data sentral
 import BookmarkButton from "@/components/BookmarkButton"; // Import komponen baru
