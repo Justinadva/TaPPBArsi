@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme {
+  /* --- PALET WARNA ARCHSMART (Dark Theme) --- */
+  
+  /* Background Utama (Hitam Pekat) */
+  --color-background: #0f0f0f;
+  
+  /* Teks Utama (Putih) */
+  --color-foreground: #ffffff;
+
+  /* Warna Aksen (Oranye - dari tombol di desain) */
+  --color-primary: #ff8c42;
+  --color-primary-hover: #ff7b1a;
+  
+  /* Warna Kartu / Surface */
+  --color-card: #1a1a1a;
+  --color-card-border: rgba(255, 255, 255, 0.1);
+
+  /* Font (Sesuai Layout) */
+  --font-sans: 'Poppins', sans-serif;
+}
+
+/* --- BASE STYLES --- */
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- UTILITIES CUSTOM --- */
+@layer utilities {
+  
+  /* Efek Kaca (Glassmorphism) untuk Kartu */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.03); /* Transparan dikit */
+    backdrop-filter: blur(16px);           /* Blur belakangnya */
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-card-border);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Efek Kaca untuk Header (Lebih gelap agar teks terbaca) */
+  .glass-header {
+    background: rgba(15, 15, 15, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Padding aman untuk iPhone berponi/notch */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Utilitas Teks Gradient (Opsional untuk judul) */
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(to right, #fff, #9ca3af);
+  }
+}
+
+/* Scrollbar Custom (Agar menyatu dengan tema gelap) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-background); 
+}
+::-webkit-scrollbar-thumb {
+  background: #333; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
