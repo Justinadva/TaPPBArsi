@@ -10,7 +10,8 @@ const ALL_COURSES = [
     id: "1",
     title: "Modern Apartment Design",
     category: "Interior",
-    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
     price: "$24.00",
     duration: "6 Jam",
     modules: 12,
@@ -20,7 +21,8 @@ const ALL_COURSES = [
     id: "2",
     title: "Eco-Friendly Green House",
     category: "Sustainable",
-    image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800&q=80",
     price: "Free",
     duration: "4 Jam",
     modules: 8,
@@ -30,7 +32,8 @@ const ALL_COURSES = [
     id: "3",
     title: "Urban Sketching Masterclass",
     category: "Skill",
-    image: "https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&w=800&q=80",
     price: "$15.00",
     duration: "3 Jam",
     modules: 5,
@@ -40,7 +43,8 @@ const ALL_COURSES = [
     id: "4",
     title: "High-Rise Building Structure",
     category: "Structure",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
     price: "$35.00",
     duration: "10 Jam",
     modules: 15,
@@ -50,7 +54,8 @@ const ALL_COURSES = [
     id: "5",
     title: "Minimalist Landscape",
     category: "Landscape",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
     price: "$18.00",
     duration: "5 Jam",
     modules: 9,
@@ -60,7 +65,8 @@ const ALL_COURSES = [
     id: "6",
     title: "3D Rendering with Blender",
     category: "Software",
-    image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=800&q=80",
     price: "$20.00",
     duration: "8 Jam",
     modules: 14,
@@ -78,7 +84,6 @@ export default function CoursesPage() {
 
   return (
     <div className="space-y-10 min-h-[80vh] animate-in fade-in duration-700">
-      
       {/* Header & Search Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
@@ -86,7 +91,8 @@ export default function CoursesPage() {
             Explore <span className="text-[#ff8c42]">Courses</span>
           </h1>
           <p className="text-gray-400 max-w-md text-sm md:text-base">
-            Temukan materi terbaik untuk meningkatkan skill arsitekturmu hari ini.
+            Temukan materi terbaik untuk meningkatkan skill arsitekturmu hari
+            ini.
           </p>
         </div>
 
@@ -94,7 +100,10 @@ export default function CoursesPage() {
         <div className="flex gap-3 w-full md:w-auto">
           <div className="relative w-full md:w-80 group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="text-gray-500 group-focus-within:text-[#ff8c42] transition-colors" size={20} />
+              <Search
+                className="text-gray-500 group-focus-within:text-[#ff8c42] transition-colors"
+                size={20}
+              />
             </div>
             <input
               type="text"
@@ -104,7 +113,7 @@ export default function CoursesPage() {
               placeholder="Cari materi..."
             />
           </div>
-          
+
           {/* Tombol Filter (Hiasan) */}
           <button className="p-3.5 bg-[#1a1a1a] border border-white/10 rounded-2xl text-gray-400 hover:text-white hover:border-white/30 transition flex-shrink-0">
             <SlidersHorizontal size={20} />
