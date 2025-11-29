@@ -5,8 +5,13 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
-  swcMinify: false, // <--- UBAH KE FALSE (Solusi Error)
-  disable: process.env.NODE_ENV === "development",
+  
+  // SOLUSI ERROR: Matikan minifikasi SWC untuk PWA
+  swcMinify: false, 
+  
+  // Pastikan PWA mati saat dev agar tidak looping compile
+  disable: process.env.NODE_ENV === "development", 
+  
   workboxOptions: {
     disableDevLogs: true,
   },
