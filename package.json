@@ -17,6 +17,7 @@
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "sonner": "^1.7.4",
+    "swagger-ui-react": "^5.30.3",
     "tailwind-merge": "^2.6.0",
     "tailwindcss": "^4.1.17"
   },
@@ -24,6 +25,7 @@
     "@tailwindcss/postcss": "^4.1.17",
     "@types/react": "^18.3.27",
     "@types/react-dom": "^18.3.7",
+    "@types/swagger-ui-react": "^5.18.0",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.5",
     "postcss": "^8",
