@@ -21,6 +21,7 @@ interface CourseDB {
 export default function CoursesPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  
   const [fetchedCourses, setFetchedCourses] = useState<CourseDB[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
@@ -29,6 +30,7 @@ export default function CoursesPage() {
     async function fetchCourses() {
       setIsLoading(true);
       setErrorMsg("");
+      
       try {
         const { data, error } = await supabase
           .from("courses")
@@ -36,14 +38,16 @@ export default function CoursesPage() {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
+
         setFetchedCourses(data || []);
-      } catch (err: any) {
+      } catch (err) { // HAPUS ': any'
         console.error("Error fetching courses:", err);
-        setErrorMsg("Gagal memuat data kursus.");
+        setErrorMsg("Gagal memuat data kursus. Periksa koneksi internet Anda.");
       } finally {
         setIsLoading(false);
       }
     }
+    
     fetchCourses();
   }, []);
 
@@ -117,12 +121,11 @@ export default function CoursesPage() {
                         id={course.id}
                         title={course.title}
                         category={course.category || "General"}
-                        // UPDATE: Hanya menggunakan data dari DB
                         image={course.image_url} 
                         price={course.price}
                         duration={course.duration}
                         modules={course.modules_count || 0}
-                        rating={course.rating || 5.0}
+                        rating={course.rating || 4.8}
                     />
                 ))}
             </div>

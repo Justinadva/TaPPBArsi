@@ -9,7 +9,6 @@ interface ApiDocsClientProps {
     baseUrl: string;
 }
 
-// Load Swagger UI hanya di client-side
 const SwaggerUI = dynamic(() => import('@/components/SwaggerUI'), { 
     ssr: false, 
     loading: () => (
@@ -22,7 +21,6 @@ const SwaggerUI = dynamic(() => import('@/components/SwaggerUI'), {
 
 export default function ApiDocsClient({ baseUrl }: ApiDocsClientProps) {
   
-  // Clone & Inject Server URL
   const dynamicSpec = {
     ...swaggerSpec,
     servers: [{ url: baseUrl, description: "Server Saat Ini" }]
@@ -31,7 +29,6 @@ export default function ApiDocsClient({ baseUrl }: ApiDocsClientProps) {
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 pt-6">
       
-      {/* Header Navigasi */}
       <div className="flex items-center justify-between">
         <Link
             href="/"
@@ -42,7 +39,6 @@ export default function ApiDocsClient({ baseUrl }: ApiDocsClientProps) {
         </Link>
       </div>
 
-      {/* Judul Halaman */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
             <BookOpen size={32} className='text-[#ff8c42]'/>
@@ -51,12 +47,12 @@ export default function ApiDocsClient({ baseUrl }: ApiDocsClientProps) {
             </h1>
         </div>
         <p className='text-gray-400 max-w-2xl text-sm leading-relaxed'>
+            {/* PERBAIKAN DI SINI: Gunakan &quot; untuk tanda kutip */}
             Dokumentasi lengkap untuk endpoint REST API ArchSmart Lite. 
-            Gunakan fitur <b>"Try it out"</b> untuk menguji respons data langsung dari database Supabase Anda.
+            Gunakan fitur <b>&quot;Try it out&quot;</b> untuk menguji respons data langsung dari database Supabase Anda.
         </p>
       </div>
 
-      {/* Swagger UI Container */}
       <div className='pt-2'>
         <SwaggerUI spec={dynamicSpec} /> 
       </div>

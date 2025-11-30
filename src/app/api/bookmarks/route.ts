@@ -13,7 +13,6 @@ export async function GET(request: Request) {
   }
 
   try {
-    // 1. Ambil data bookmarks
     const { data: bookmarks, error } = await supabase
       .from("bookmarks")
       .select("course_id")
@@ -21,12 +20,10 @@ export async function GET(request: Request) {
 
     if (error) throw error;
 
-    // 2. Jika kosong, return array kosong
     if (!bookmarks || bookmarks.length === 0) {
       return NextResponse.json([], { status: 200 });
     }
 
-    // 3. Ambil detail course berdasarkan ID yang didapat
     const courseIds = bookmarks.map((b) => b.course_id);
     const { data: courses, error: coursesError } = await supabase
       .from("courses")
@@ -37,8 +34,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json(courses, { status: 200 });
 
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+  } catch (error: unknown) { 
+    // PERBAIKAN: Gunakan 'unknown' alih-alih 'any'
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ message }, { status: 500 });
   }
 }
 
@@ -52,7 +51,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Missing user_id or course_id" }, { status: 400 });
     }
 
-    // Cek apakah sudah ada (untuk mencegah duplikat/error)
     const { data: existing } = await supabase
       .from("bookmarks")
       .select("id")
@@ -61,11 +59,9 @@ export async function POST(request: Request) {
       .single();
 
     if (existing) {
-      // Jika sudah ada, kita anggap sukses (atau bisa dibuat logic un-bookmark)
       return NextResponse.json({ message: "Bookmark already exists" }, { status: 200 });
     }
 
-    // Insert baru
     const { error } = await supabase
       .from("bookmarks")
       .insert({ user_id, course_id });
@@ -74,7 +70,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: "Bookmark added successfully" }, { status: 201 });
 
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+  } catch (error: unknown) { 
+    // PERBAIKAN: Gunakan 'unknown' alih-alih 'any'
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ message }, { status: 500 });
   }
 }
