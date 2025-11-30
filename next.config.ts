@@ -18,7 +18,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
 });
 
 const nextConfig: NextConfig = {
-  output: "export", 
+ // output: "export", 
   trailingSlash: true,
   images: {
     unoptimized: true,

@@ -1,15 +1,28 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { Bookmark, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { ALL_COURSES } from "@/data/courses"; // Gunakan data sentral
 import CourseCard from "@/components/CourseCard";
+// HAPUS IMPORT INI: import { ALL_COURSES } from "@/data/courses"; 
+
+// Definisikan tipe data sesuai struktur tabel 'courses' di Supabase Anda
+interface CourseData {
+  id: string;
+  title: string;
+  category: string;
+  image_url: string; // Sesuaikan dengan nama kolom di DB (image_url)
+  price: string;
+  duration: string;
+  modules_count: number; // Sesuaikan dengan nama kolom di DB (modules_count)
+  rating?: number; // Optional jika belum ada di DB
+}
 
 export default function BookmarksPage() {
   const { user, loading: authLoading } = useAuth();
-  const [savedCourses, setSavedCourses] = useState<typeof ALL_COURSES>([]);
+  const [savedCourses, setSavedCourses] = useState<CourseData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,24 +32,41 @@ export default function BookmarksPage() {
         return;
       }
 
-      // 1. Ambil ID course dari tabel bookmarks di Supabase
-      const { data, error } = await supabase
-        .from("bookmarks")
-        .select("course_id")
-        .eq("user_id", user.id);
+      try {
+        setLoading(true);
 
-      if (error) {
-        console.error(error);
+        // 1. Ambil daftar course_id dari tabel bookmarks milik user
+        const { data: bookmarkData, error: bookmarkError } = await supabase
+          .from("bookmarks")
+          .select("course_id")
+          .eq("user_id", user.id);
+
+        if (bookmarkError) throw bookmarkError;
+
+        if (!bookmarkData || bookmarkData.length === 0) {
+          setSavedCourses([]);
+          setLoading(false);
+          return;
+        }
+
+        // Ambil array ID
+        const courseIds = bookmarkData.map((item) => item.course_id);
+
+        // 2. Ambil detail kursus dari tabel courses berdasarkan ID tersebut
+        const { data: coursesData, error: coursesError } = await supabase
+          .from("courses")
+          .select("*")
+          .in("id", courseIds);
+
+        if (coursesError) throw coursesError;
+
+        setSavedCourses(coursesData || []);
+
+      } catch (error) {
+        console.error("Error fetching bookmarks:", error);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      // 2. Filter data lokal ALL_COURSES berdasarkan ID yang didapat
-      const savedIds = data.map((item) => item.course_id);
-      const filtered = ALL_COURSES.filter((course) => savedIds.includes(course.id));
-      
-      setSavedCourses(filtered);
-      setLoading(false);
     }
 
     if (!authLoading) {
@@ -44,6 +74,7 @@ export default function BookmarksPage() {
     }
   }, [user, authLoading]);
 
+  // Loading State
   if (authLoading || loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -52,6 +83,7 @@ export default function BookmarksPage() {
     );
   }
 
+  // Not Logged In State
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -63,13 +95,14 @@ export default function BookmarksPage() {
     );
   }
 
+  // Render Utama
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-white">Saved Courses</h1>
 
       {savedCourses.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center opacity-50">
-          <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mb-4">
+          <div className="w-20 h-20 bg-[#1a1a1a] rounded-full flex items-center justify-center mb-4 border border-white/5">
             <Bookmark size={32} className="text-gray-400" />
           </div>
           <p className="text-lg text-gray-300">Belum ada materi disimpan.</p>
@@ -80,17 +113,19 @@ export default function BookmarksPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
           {savedCourses.map((course) => (
-            // Mapping CourseCard dengan data asli
             <CourseCard 
                 key={course.id}
                 id={course.id}
                 title={course.title}
                 category={course.category}
-                image={course.image}
+                // Mapping properti DB (image_url) ke prop Component (image)
+                image={course.image_url || "/placeholder-image.jpg"} 
                 price={course.price}
                 duration={course.duration}
-                modules={course.modules_count || 0} // Fallback karena data dummy beda struktur sedikit
-                rating={course.rating}
+                // Mapping properti DB (modules_count) ke prop Component (modules)
+                modules={course.modules_count || 0} 
+                // Default rating jika tidak ada di DB
+                rating={course.rating || 5.0} 
             />
           ))}
         </div>

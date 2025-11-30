@@ -1,37 +1,76 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
 import CourseCard from "@/components/CourseCard";
-import { ALL_COURSES } from "@/data/courses"; 
+// HAPUS IMPORT INI: import { ALL_COURSES } from "@/data/courses"; 
+// import { Course } from "@/types"; // Opsional: Kita definisikan interface lokal agar lebih aman
 
 const ITEMS_PER_PAGE = 6;
+
+// Definisi Tipe Data Sesuai Database Supabase
+interface CourseFromDB {
+  id: string;
+  title: string;
+  category: string;
+  image_url: string;   // Nama kolom di DB Supabase
+  price: string;
+  duration: string;
+  modules_count: number; // Nama kolom di DB Supabase
+  rating?: number;       // Opsional karena tidak ada di schema DB awal
+}
 
 export default function CoursesPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  
+  // State untuk data dari API
+  const [fetchedCourses, setFetchedCourses] = useState<CourseFromDB[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // 1. Handler Pencarian (Gabungkan setState di sini)
+  // --- 1. Ambil Data dari API Supabase ---
+  useEffect(() => {
+    async function fetchCourses() {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/courses"); 
+        
+        if (!response.ok) {
+          throw new Error("Gagal mengambil data kursus dari API.");
+        }
+        
+        const data: CourseFromDB[] = await response.json();
+        setFetchedCourses(data || []);
+
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchCourses();
+  }, []);
+
+  // --- 2. Handler Pencarian ---
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); // Reset ke halaman 1 langsung saat mengetik (Sync)
+    setPage(1); 
   };
 
-  // 2. Filter Data
+  // --- 3. Filter Data ---
   const filteredCourses = useMemo(() => {
-    return ALL_COURSES.filter((course) =>
+    return fetchedCourses.filter((course) =>
       course.title.toLowerCase().includes(search.toLowerCase())
     );
-  }, [search]);
+  }, [search, fetchedCourses]);
 
-  // HAPUS useEffect yang lama di sini (Penyebab Error)
-
-  // 3. Slicing Data
+  // --- 4. Pagination ---
   const visibleCourses = filteredCourses.slice(0, page * ITEMS_PER_PAGE);
   const hasMore = visibleCourses.length < filteredCourses.length;
 
-  // Fungsi Load More
+  // --- 5. Fungsi Load More ---
   const handleLoadMore = () => {
     setIsLoadingMore(true);
     setTimeout(() => {
@@ -40,6 +79,17 @@ export default function CoursesPage() {
     }, 500);
   };
 
+  // --- Tampilan Loading Awal ---
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <Loader2 className="animate-spin text-[#ff8c42]" size={40} />
+        <p className="mt-4 text-white">Memuat data kursus dari Supabase...</p>
+      </div>
+    );
+  }
+
+  // --- Tampilan Utama ---
   return (
     <div className="space-y-10 min-h-[80vh]">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -60,7 +110,7 @@ export default function CoursesPage() {
             <input
               type="text"
               value={search}
-              onChange={handleSearchChange} // Gunakan handler baru
+              onChange={handleSearchChange} 
               className="w-full pl-11 pr-4 py-3.5 bg-[#1a1a1a] border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-[#ff8c42] focus:ring-1 focus:ring-[#ff8c42] transition-all text-sm"
               placeholder="Cari materi..."
             />
@@ -75,7 +125,22 @@ export default function CoursesPage() {
         <div className="space-y-12 pb-10">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {visibleCourses.map((course) => (
-                    <CourseCard key={course.id} {...course} modules={course.modules_count || 0} />
+                    // PERBAIKAN: Mapping manual properti DB ke Props CourseCard
+                    <CourseCard 
+                        key={course.id} 
+                        id={course.id}
+                        title={course.title}
+                        category={course.category}
+                        // Mapping: image_url (DB) -> image (Prop)
+                        // Gunakan placeholder jika gambar kosong
+                        image={course.image_url || "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80"} 
+                        price={course.price}
+                        duration={course.duration}
+                        // Mapping: modules_count (DB) -> modules (Prop)
+                        modules={course.modules_count || 0}
+                        // Default rating karena tidak ada di tabel DB
+                        rating={course.rating || 4.8}
+                    />
                 ))}
             </div>
             {hasMore && (
@@ -99,7 +164,7 @@ export default function CoursesPage() {
             <Search size={32} className="text-gray-500" />
           </div>
           <h3 className="text-lg font-bold text-white">Tidak ditemukan</h3>
-          <p className="text-gray-400 text-sm">Coba kata kunci lain.</p>
+          <p className="text-gray-400 text-sm">Coba kata kunci lain atau periksa koneksi Supabase Anda.</p>
         </div>
       )}
     </div>

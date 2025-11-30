@@ -1,0 +1,95 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ArchSmart Lite API",
+    "version": "1.0.0",
+    "description": "Dokumentasi API untuk platform edukasi ArchSmart Lite. Endpoint ini disimulasikan berdasarkan fungsionalitas aplikasi."
+  },
+  "servers": [
+    {
+      "url": "{serverUrl}", 
+      "description": "Current Environment URL (Diisi saat runtime)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Courses",
+      "description": "Manajemen data kursus (Membaca data dari src/data/courses.ts)"
+    },
+    {
+      "name": "Bookmarks",
+      "description": "Penyimpanan dan pengambilan bookmark kursus (Memanggil Supabase)"
+    }
+  ],
+  "paths": {
+    "/api/courses": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Mendapatkan daftar semua kursus",
+        "responses": {
+          "200": {
+            "description": "Daftar kursus berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Course"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bookmarks": {
+      "post": {
+        "tags": ["Bookmarks"],
+        "summary": "Menyimpan/menghapus bookmark kursus",
+        "description": "Endpoint ini mensimulasikan interaksi dengan tabel `bookmarks` di Supabase. Memerlukan otorisasi pengguna.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "courseId": {
+                    "type": "string",
+                    "description": "ID kursus yang akan di-bookmark/dihapus."
+                  }
+                },
+                "required": ["courseId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bookmark berhasil ditambahkan/dihapus."
+          },
+          "401": {
+            "description": "Unauthorized, pengguna belum login."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Course": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "category": { "type": "string" },
+          "price": { "type": "string" },
+          "duration": { "type": "string" },
+          "modules_count": { "type": "integer" },
+          "rating": { "type": "number", "format": "float" }
+        }
+      }
+    }
+  }
+}

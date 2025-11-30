@@ -1,45 +1,88 @@
-import LessonClient, { CourseContent } from "./LessonClient";
 import { notFound } from "next/navigation";
-import { ALL_COURSES } from "@/data/courses";
+import { supabase } from "@/lib/supabase";
+import LessonClient, { CourseContent, Module } from "./LessonClient";
 
-export async function generateStaticParams() {
-  return ALL_COURSES.flatMap((course) => 
-    course.modules_list.map((moduleItem) => ({
-      id: course.id,
-      moduleId: moduleItem.id,
-    }))
-  );
-}
+// Hapus generateStaticParams karena kita menggunakan Dynamic Rendering (Data Real-time)
 
 export default async function LessonPageWrapper({ 
   params 
 }: { 
   params: Promise<{ id: string; moduleId: string }> 
 }) {
-    const resolvedParams = await params;
-    const courseData = ALL_COURSES.find((c) => c.id === resolvedParams.id);
+  const resolvedParams = await params;
+  const { id: courseId, moduleId } = resolvedParams;
 
-    if (!courseData) return notFound();
+  console.log("--> Memuat Modul...");
+  console.log("    Course ID:", courseId);
+  console.log("    Module ID:", moduleId);
 
-    const moduleExists = courseData.modules_list.some((m) => m.id === resolvedParams.moduleId);
-    if (!moduleExists) return notFound();
+  // 1. Ambil Judul Course (untuk header/konteks)
+  const { data: courseData, error: courseError } = await supabase
+    .from("courses")
+    .select("id, title")
+    .eq("id", courseId)
+    .single();
 
-    // PERBAIKAN: Mapping data dengan tipe yang benar (menghilangkan 'as any')
-    const formattedContent: CourseContent = {
-        id: courseData.id,
-        title: courseData.title,
-        modules: courseData.modules_list.map(m => ({
-            ...m,
-            // Paksa tipe string menjadi tipe literal union yang diharapkan
-            type: m.type as 'video' | 'reading' 
-        })),
-    };
+  if (courseError || !courseData) {
+    console.error("❌ Course tidak ditemukan atau Error:", courseError?.message);
+    return notFound();
+  }
 
-    return (
-        <LessonClient 
-            courseId={resolvedParams.id} 
-            moduleId={resolvedParams.moduleId} 
-            courseContent={formattedContent} 
-        />
-    );
+  // 2. Ambil Daftar Modul dari Database
+  // Kita ambil SEMUA modul di course ini untuk membuat sidebar navigasi
+  const { data: modulesData, error: modulesError } = await supabase
+    .from("modules")
+    .select("*")
+    .eq("course_id", courseId)
+    .order("position", { ascending: true }); // Pastikan kolom 'position' ada di DB
+
+  // Cek Error Database
+  if (modulesError) {
+    console.error("❌ Gagal mengambil modules:", modulesError.message);
+    return notFound(); // Atau bisa return Error UI
+  }
+
+  // Cek Apakah Modul Kosong
+  if (!modulesData || modulesData.length === 0) {
+    console.warn("⚠️ Tidak ada modul ditemukan di database untuk Course ID ini.");
+    // Jika tidak ada modul sama sekali di DB, kita return 404
+    return notFound();
+  }
+
+  // 3. Mapping data dari DB ke tipe Module untuk Client Component
+  // Pastikan properti video_url dan type ditangani dengan aman
+  const validModules: Module[] = modulesData.map((m) => ({
+    id: m.id,
+    title: m.title,
+    duration: m.duration || "5 min",
+    // Pastikan type hanya 'video' atau 'reading'. Default ke 'video' jika null.
+    type: (m.type === "reading") ? "reading" : "video",
+    videoUrl: m.video_url || "",
+  }));
+
+  // 4. Validasi: Apakah moduleId yang ada di URL benar-benar ada di database?
+  const currentModuleExists = validModules.some((m) => m.id === moduleId);
+  
+  if (!currentModuleExists) {
+    console.warn(`⚠️ Module ID '${moduleId}' tidak ditemukan dalam daftar modul kursus ini.`);
+    console.log("    ID Modul yang tersedia:", validModules.map(m => m.id));
+    return notFound();
+  }
+
+  // 5. Format Data Akhir untuk dikirim ke Client Component
+  const formattedContent: CourseContent = {
+    id: courseData.id,
+    title: courseData.title,
+    modules: validModules,
+  };
+
+  console.log("✅ Berhasil memuat modul:", moduleId);
+
+  return (
+    <LessonClient 
+      courseId={courseId} 
+      moduleId={moduleId} 
+      courseContent={formattedContent} 
+    />
+  );
 }
