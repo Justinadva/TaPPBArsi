@@ -7,7 +7,7 @@ interface CourseCardProps {
   id: string;
   title: string;
   category: string;
-  image: string;
+  image: string | null; // Kita izinkan null agar fleksibel
   price: string;
   duration: string;
   modules: number;
@@ -15,6 +15,13 @@ interface CourseCardProps {
 }
 
 export default function CourseCard({ id, title, category, image, price, duration, modules, rating }: CourseCardProps) {
+  
+  // LOGIKA PENGAMAN:
+  // Jika 'image' null, undefined, atau string kosong "", gunakan gambar default.
+  const fallbackImage = "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800&q=80";
+  
+  const validImage = (image && image.trim().length > 0) ? image : fallbackImage;
+
   return (
     <Link href={`/courses/${id}`} className="block group">
       <div className="glass p-5 rounded-[32px] relative overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:border-[#ff8c42]/50 hover:bg-[#1a1a1a]/80">
@@ -37,7 +44,7 @@ export default function CourseCard({ id, title, category, image, price, duration
         {/* Gambar Preview */}
         <div className="relative w-full h-44 rounded-2xl overflow-hidden mb-5 bg-gray-800">
           <Image 
-            src={image} 
+            src={validImage} // Gunakan variabel yang sudah diamankan
             alt={title} 
             fill 
             className="object-cover group-hover:scale-105 transition duration-700"

@@ -6,36 +6,30 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import CourseCard from "@/components/CourseCard";
-// HAPUS IMPORT INI: import { ALL_COURSES } from "@/data/courses"; 
 
-// Definisikan tipe data sesuai struktur tabel 'courses' di Supabase Anda
-interface CourseData {
+interface CourseDB {
   id: string;
   title: string;
   category: string;
-  image_url: string; // Sesuaikan dengan nama kolom di DB (image_url)
+  image_url: string;
   price: string;
   duration: string;
-  modules_count: number; // Sesuaikan dengan nama kolom di DB (modules_count)
-  rating?: number; // Optional jika belum ada di DB
+  modules_count: number;
+  rating?: number;
 }
 
 export default function BookmarksPage() {
   const { user, loading: authLoading } = useAuth();
-  const [savedCourses, setSavedCourses] = useState<CourseData[]>([]);
+  const [savedCourses, setSavedCourses] = useState<CourseDB[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchBookmarks() {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+      if (authLoading) return;
+      if (!user) { setLoading(false); return; }
 
       try {
         setLoading(true);
-
-        // 1. Ambil daftar course_id dari tabel bookmarks milik user
         const { data: bookmarkData, error: bookmarkError } = await supabase
           .from("bookmarks")
           .select("course_id")
@@ -49,17 +43,13 @@ export default function BookmarksPage() {
           return;
         }
 
-        // Ambil array ID
-        const courseIds = bookmarkData.map((item) => item.course_id);
-
-        // 2. Ambil detail kursus dari tabel courses berdasarkan ID tersebut
+        const courseIds = bookmarkData.map((b) => b.course_id);
         const { data: coursesData, error: coursesError } = await supabase
           .from("courses")
           .select("*")
           .in("id", courseIds);
 
         if (coursesError) throw coursesError;
-
         setSavedCourses(coursesData || []);
 
       } catch (error) {
@@ -68,13 +58,9 @@ export default function BookmarksPage() {
         setLoading(false);
       }
     }
-
-    if (!authLoading) {
-      fetchBookmarks();
-    }
+    fetchBookmarks();
   }, [user, authLoading]);
 
-  // Loading State
   if (authLoading || loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -83,7 +69,6 @@ export default function BookmarksPage() {
     );
   }
 
-  // Not Logged In State
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -95,9 +80,8 @@ export default function BookmarksPage() {
     );
   }
 
-  // Render Utama
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-[80vh]">
       <h1 className="text-3xl font-bold text-white">Saved Courses</h1>
 
       {savedCourses.length === 0 ? (
@@ -117,14 +101,12 @@ export default function BookmarksPage() {
                 key={course.id}
                 id={course.id}
                 title={course.title}
-                category={course.category}
-                // Mapping properti DB (image_url) ke prop Component (image)
-                image={course.image_url || "/placeholder-image.jpg"} 
+                category={course.category || "General"}
+                // UPDATE: Hanya menggunakan data dari DB
+                image={course.image_url} 
                 price={course.price}
                 duration={course.duration}
-                // Mapping properti DB (modules_count) ke prop Component (modules)
                 modules={course.modules_count || 0} 
-                // Default rating jika tidak ada di DB
                 rating={course.rating || 5.0} 
             />
           ))}

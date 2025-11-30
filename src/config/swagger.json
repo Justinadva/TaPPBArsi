@@ -3,39 +3,38 @@
   "info": {
     "title": "ArchSmart Lite API",
     "version": "1.0.0",
-    "description": "Dokumentasi API untuk platform edukasi ArchSmart Lite. Endpoint ini disimulasikan berdasarkan fungsionalitas aplikasi."
+    "description": "Dokumentasi REST API untuk platform edukasi ArchSmart Lite. Menggunakan Supabase sebagai backend data."
   },
   "servers": [
     {
-      "url": "{serverUrl}", 
-      "description": "Current Environment URL (Diisi saat runtime)"
+      "url": "{serverUrl}",
+      "description": "Current Environment URL"
     }
   ],
   "tags": [
     {
       "name": "Courses",
-      "description": "Manajemen data kursus (Membaca data dari src/data/courses.ts)"
+      "description": "Endpoint untuk data materi pembelajaran"
     },
     {
       "name": "Bookmarks",
-      "description": "Penyimpanan dan pengambilan bookmark kursus (Memanggil Supabase)"
+      "description": "Manajemen materi yang disimpan user"
     }
   ],
   "paths": {
     "/api/courses": {
       "get": {
         "tags": ["Courses"],
-        "summary": "Mendapatkan daftar semua kursus",
+        "summary": "Ambil semua daftar kursus",
+        "description": "Mengembalikan daftar semua kursus yang tersedia di database.",
         "responses": {
           "200": {
-            "description": "Daftar kursus berhasil diambil",
+            "description": "Berhasil mengambil data",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Course"
-                  }
+                  "items": { "$ref": "#/components/schemas/Course" }
                 }
               }
             }
@@ -43,11 +42,61 @@
         }
       }
     },
+    "/api/courses/{id}": {
+      "get": {
+        "tags": ["Courses"],
+        "summary": "Ambil detail satu kursus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail kursus ditemukan",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Course" }
+              }
+            }
+          },
+          "404": { "description": "Kursus tidak ditemukan" }
+        }
+      }
+    },
     "/api/bookmarks": {
+      "get": {
+        "tags": ["Bookmarks"],
+        "summary": "Ambil daftar bookmark user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "description": "UUID User (dari tabel auth.users)",
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar kursus yang dibookmark",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Course" }
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": ["Bookmarks"],
-        "summary": "Menyimpan/menghapus bookmark kursus",
-        "description": "Endpoint ini mensimulasikan interaksi dengan tabel `bookmarks` di Supabase. Memerlukan otorisasi pengguna.",
+        "summary": "Simpan bookmark baru",
         "requestBody": {
           "required": true,
           "content": {
@@ -55,23 +104,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "courseId": {
-                    "type": "string",
-                    "description": "ID kursus yang akan di-bookmark/dihapus."
-                  }
+                  "user_id": { "type": "string", "format": "uuid" },
+                  "course_id": { "type": "string", "format": "uuid" }
                 },
-                "required": ["courseId"]
+                "required": ["user_id", "course_id"]
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Bookmark berhasil ditambahkan/dihapus."
-          },
-          "401": {
-            "description": "Unauthorized, pengguna belum login."
-          }
+          "201": { "description": "Bookmark berhasil disimpan" },
+          "400": { "description": "Data user_id atau course_id tidak valid" }
         }
       }
     }
@@ -81,13 +124,16 @@
       "Course": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
+          "id": { "type": "string", "format": "uuid" },
           "title": { "type": "string" },
           "category": { "type": "string" },
+          "description": { "type": "string" },
+          "image_url": { "type": "string", "format": "uri" },
           "price": { "type": "string" },
           "duration": { "type": "string" },
           "modules_count": { "type": "integer" },
-          "rating": { "type": "number", "format": "float" }
+          "rating": { "type": "number" },
+          "created_at": { "type": "string", "format": "date-time" }
         }
       }
     }

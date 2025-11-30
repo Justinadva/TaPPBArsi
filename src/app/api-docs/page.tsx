@@ -1,21 +1,20 @@
-// justinadva/tappbarsi/TaPPBArsi-5fe512c881164db80d373ed126fb36130d718e09/src/app/api-docs/page.tsx
 import ApiDocsClient from './ApiDocsClient';
-// Hapus import { headers } dari 'next/headers'
 
-// Tidak perlu 'async' dan 'await'
 export default function ApiDocsPage() {
+  // Logika Deteksi URL Server Otomatis
+  // 1. Cek environment variable dari Vercel (saat deploy)
+  const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL;
   
-  // Menggunakan NEXT_PUBLIC_VERCEL_URL (diisi Vercel saat build) atau fallback localhost
-  const host = process.env.NEXT_PUBLIC_VERCEL_URL || 'localhost:3000';
+  // 2. Tentukan protocol (https di production, http di localhost)
+  const protocol = vercelUrl ? 'https' : 'http';
   
-  // Tentukan protokol
-  const protocol = host.includes('localhost') ? 'http' : 'https';
+  // 3. Tentukan host (vercel url atau localhost)
+  const host = vercelUrl || 'localhost:3000';
   
-  // Gabungkan untuk mendapatkan URL dasar lengkap
+  // 4. Gabungkan
   const baseUrl = `${protocol}://${host}`;
 
   return (
-    // Teruskan baseUrl ke Client Component
     <ApiDocsClient baseUrl={baseUrl} />
   );
 }

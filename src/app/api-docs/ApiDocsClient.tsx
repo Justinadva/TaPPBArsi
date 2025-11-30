@@ -1,4 +1,3 @@
-// justinadva/tappbarsi/TaPPBArsi-5fe512c881164db80d373ed126fb36130d718e09/src/app/api-docs/ApiDocsClient.tsx
 "use client";
 
 import dynamic from 'next/dynamic';
@@ -7,50 +6,58 @@ import { ArrowLeft, BookOpen } from 'lucide-react';
 import swaggerSpec from "@/config/swagger.json"; 
 
 interface ApiDocsClientProps {
-    baseUrl: string; // Menerima URL dinamis dari Server Component
+    baseUrl: string;
 }
 
+// Load Swagger UI hanya di client-side
 const SwaggerUI = dynamic(() => import('@/components/SwaggerUI'), { 
     ssr: false, 
     loading: () => (
-        <div className="flex justify-center items-center h-64">
-           <p className='text-gray-400'>Memuat Dokumentasi API...</p>
+        <div className="flex flex-col items-center justify-center h-64 gap-3">
+           <div className="w-8 h-8 border-4 border-[#ff8c42] border-t-transparent rounded-full animate-spin"></div>
+           <p className='text-gray-400 text-sm'>Memuat Dokumentasi API...</p>
         </div>
     )
 });
 
 export default function ApiDocsClient({ baseUrl }: ApiDocsClientProps) {
   
-  // 1. Kloning spesifikasi dasar (Penting: agar tidak memodifikasi objek impor statis)
-  const dynamicSpec = JSON.parse(JSON.stringify(swaggerSpec));
-  
-  // 2. Ganti placeholder {serverUrl} dengan baseUrl yang dinamis
-  dynamicSpec.servers = [{ url: baseUrl, description: "Current Environment URL" }];
+  // Clone & Inject Server URL
+  const dynamicSpec = {
+    ...swaggerSpec,
+    servers: [{ url: baseUrl, description: "Server Saat Ini" }]
+  };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 pt-6">
       
-      {/* Header */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition group"
-      >
-        <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform"/>
-        <span>Kembali ke Home</span>
-      </Link>
-
-      <div className="flex items-center gap-4">
-        <BookOpen size={48} className='text-[#ff8c42]'/>
-        <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-            API <span className='text-[#ff8c42]'>Docs</span>
-        </h1>
+      {/* Header Navigasi */}
+      <div className="flex items-center justify-between">
+        <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition group bg-white/5 px-4 py-2 rounded-full border border-white/5 hover:border-white/10"
+        >
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform"/>
+            <span className="text-sm font-medium">Kembali ke Home</span>
+        </Link>
       </div>
-      <p className='text-gray-400 max-w-2xl'>
-        Dokumentasi interaktif untuk REST API ArchSmart. URL server otomatis disesuaikan.
-      </p>
 
-      {/* Swagger UI Component */}
-      <div className='pt-4'>
+      {/* Judul Halaman */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+            <BookOpen size={32} className='text-[#ff8c42]'/>
+            <h1 className="text-3xl md:text-4xl font-bold text-white">
+                API Documentation
+            </h1>
+        </div>
+        <p className='text-gray-400 max-w-2xl text-sm leading-relaxed'>
+            Dokumentasi lengkap untuk endpoint REST API ArchSmart Lite. 
+            Gunakan fitur <b>"Try it out"</b> untuk menguji respons data langsung dari database Supabase Anda.
+        </p>
+      </div>
+
+      {/* Swagger UI Container */}
+      <div className='pt-2'>
         <SwaggerUI spec={dynamicSpec} /> 
       </div>
 
