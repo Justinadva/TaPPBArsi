@@ -248,7 +248,7 @@ export default function HomePage() {
     async function fetchFromServiceB() {
       try {
         // Pastikan backend Python berjalan di port 8000 saat demo
-        const res = await fetch('http://localhost:8000/api/recommendations', {
+        const res = await fetch('https://tappbarsi.onrender.com/api/recommendations', {
             cache: 'no-store', // Pastikan data selalu fresh untuk demo
             mode: 'cors'
         });
